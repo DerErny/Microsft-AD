@@ -1,7 +1,9 @@
 ﻿#Active Directory Passwort Policy:
-$MaxPasswordAge = 180	#Max Password age in days
+$MaxPasswordAge = 180		#Max Password age in days
 $WarningLevel = 5		#Warn Users XX Days before Password expires
 $StopWarningLevel = -1 		#Stop sending Mails to User XX Days after Password is expired (AntiSpam)
+$ExpirePasswordList = ' '	# Clearing the Variable $ExpirePasswordList
+$MailAddress = ' ' 		#Clearing Variable  $MailAddress
 
 #Mail Settings:
 $SMTPServer = "meinmail.server.de"
@@ -44,6 +46,7 @@ foreach ($ADUser in $AllADUsers)
   $PasswordLastSet = '' #Empty PasswordLastSet
   $GivenName = $ADUser.GivenName
   $name = $ADUser.name
+  $MailAddress = $ADUser.mail
  
   $PasswordLastSet = $ADUser.PasswordLastSet
   if ($PasswordLastSet) { # Starts only if PasswordLastSet is set. Users who never logged on didn´t set any Password
@@ -52,13 +55,13 @@ foreach ($ADUser in $AllADUsers)
   
   $DaysBeforePasswordchange = ($PasswordExpireDate - $today).Days
     
-  if ($DaysBeforePasswordchange -le $WarningLevel)
-   {
-    if ($DaysBeforePasswordchange -le $StopWarningLevel){ #Skip mail creation when Password is already expired
-    } else{
-	    $ExpirePasswordList += new-object PSObject -property @{Name=$name;MailAddress=$MailAddress;DaysBeforePasswordchange=$DaysBeforePasswordchange;PasswordExpireDate=$PasswordExpireDate} 
+   if ($DaysBeforePasswordchange -le $WarningLevel)
+    {
+     if ($DaysBeforePasswordchange -le $StopWarningLevel){ #Skip mail creation when Password is already expired
+     } else{
+       $ExpirePasswordList += new-object PSObject -property @{Name=$name;MailAddress=$MailAddress;DaysBeforePasswordchange=$DaysBeforePasswordchange;PasswordExpireDate=$PasswordExpireDate} 
+     }
     }
-   }
    }
  }
 
@@ -70,6 +73,7 @@ foreach ($ADUser in $ExpirePasswordList)
  {
   $GivenName = $ADUser.GivenName
   $name = $ADUser.name
+  $MailAddress = $ADUser.MailAddress
   $DaysBeforePasswordchange = $ADUser.DaysBeforePasswordchange
   $PasswordExpireDate = $ADUser.PasswordExpireDate
   
