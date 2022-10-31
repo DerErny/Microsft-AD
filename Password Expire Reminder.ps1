@@ -78,7 +78,10 @@ foreach ($ADUser in $ExpirePasswordList)
   $DaysBeforePasswordchange = $ADUser.DaysBeforePasswordchange	 
   $PasswordExpireDate = $ADUser.PasswordExpireDate
   
-  $Body = New-MailBody $name $DaysBeforePasswordchange $PasswordExpireDate
+  $Body = New-MailBody $name $DaysBeforePasswordchange $PasswordExpireDate # Creates a new MialBody in HTML Format (jump to Line 16)
+   
+  # $Body | out-file -filepath C:\temp\dump.txt # Line to Dump the mail to a TXT File
+  # $MailAddress = 'mail@address.de' Line to change the mailadress of every Mail to the same one. For Test Porpuse only.
   
   Send-MailMessage -SmtpServer $SMTPServer -To $MailAddress -From $From -Body $Body -BodyAsHtml -Subject $Subject -encoding ([System.Text.Encoding]::UTF8)
  }
