@@ -1,10 +1,11 @@
-﻿#Active Directory Passwort Policy:
+#Active Directory Passwort Policy:
 $MaxPasswordAge = 180		#Max Password age in days
 $WarningLevel = 5		#Warn Users XX Days before Password expires
-$StopWarningLevel = -1 		#Stop sending Mails to User XX Days after Password is expired (AntiSpam)
+$StopWarningLevel = 0 		#Stop sending Mails to User XX Days after Password is expired (kind of AntiSpam)
+
 $ExpirePasswordList = ' '	# Clearing the Variable $ExpirePasswordList
 $MailAddress = ' ' 		#Clearing Variable  $MailAddress
-
+                            	# Has to be 0. Negative count doesn´t work right
 #Mail Settings:
 $SMTPServer = "meinmail.server.de"
 $From = "support@mail-adresse.de"
@@ -43,12 +44,12 @@ $today = get-date
 $ExpirePasswordList =@() 
 foreach ($ADUser in $AllADUsers)
  {
-  $PasswordLastSet = '' #Empty PasswordLastSet
-  $GivenName = $ADUser.GivenName
-  $name = $ADUser.name
-  $MailAddress = $ADUser.mail
+  $PasswordLastSet = ''		 #Empty PasswordLastSet
+  $GivenName = $ADUser.GivenName #Write GivenName to Variable
+  $name = $ADUser.name 		 #Write Full Name to Variable 
+  $MailAddress = $ADUser.mail 	 #Write Users Mailadress to Variable
  
-  $PasswordLastSet = $ADUser.PasswordLastSet
+  $PasswordLastSet = $ADUser.PasswordLastSet #Write Date of Last Password Change to Variable 
   if ($PasswordLastSet) { # Starts only if PasswordLastSet is set. Users who never logged on didn´t set any Password
   
   $PasswordExpireDate = $PasswordLastSet.AddDays(+$MaxPasswordAge)
@@ -71,10 +72,10 @@ $ExpirePasswordList = $ExpirePasswordList | Where {$_.mailaddress}
 #Send mail to every user with expired password
 foreach ($ADUser in $ExpirePasswordList)
  {
-  $GivenName = $ADUser.GivenName
-  $name = $ADUser.name
-  $MailAddress = $ADUser.MailAddress
-  $DaysBeforePasswordchange = $ADUser.DaysBeforePasswordchange
+  $GivenName = $ADUser.GivenName 	
+  $name = $ADUser.name		 	
+  $MailAddress = $ADUser.MailAddress	
+  $DaysBeforePasswordchange = $ADUser.DaysBeforePasswordchange	 
   $PasswordExpireDate = $ADUser.PasswordExpireDate
   
   $Body = New-MailBody $name $DaysBeforePasswordchange $PasswordExpireDate
